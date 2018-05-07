@@ -26,11 +26,17 @@
     (mapv #(. c (getObject (GetObjectRequest. "ejendomme" id %))) v)))
 
 (def estruct {:vur-ejd {:adresse {:afstand_samletskov nil :afstand_vindmoelle nil :afstand_skov nil :afstand_vandloeb nil :afstand_soe nil :afstand_togstation nil :afstand_hoejspaending nil :afstand_jernbane nil :afstand_kystlinie nil :afstand_vej nil}
-                        :bfe [{:sfe {:jordstykke [{:bygning [{:bygning_flag []}
-                                                             {:etage [{:enhed {:lokation nil}}]}]
+                        :bfe [{:sfe {:jordstykke [{:bygning [{:bygning_flag []
+                                                              :etage [{:enhed {:lokation nil}}]}]
                                                    :tekniskanlaeg []}]}
                                 :bfg [:bygning]
-                                :ejerlejlighed [:enhed]}]}})
+                               :ejerlejlighed [:enhed]}]}})
+
+(def TM
+  (s/recursive-path [] p
+                    (s/cond-path
+                     map? (s/continue-then-stay s/MAP-VALS p)
+                     vector? [s/ALL p])))
 
 (defn create-events [e]
   (let [vk (filter #(not (in? (keys (:vur-ejd estruct)) %)) (s/select [s/MAP-KEYS] e))
